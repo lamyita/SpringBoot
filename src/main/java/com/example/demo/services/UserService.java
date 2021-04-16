@@ -4,22 +4,22 @@ import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.example.demo.shered.dto.UserDato;
+import com.example.demo.shered.dto.UserDto;
 
 public interface UserService extends UserDetailsService {
 
-	UserDato creatUser(UserDato userDto);
+	UserDto creatUser(UserDto userDto);
 	
-	UserDato getUser(String email);
+	UserDto getUser(String email);
 	
-	UserDato getUserByUserId(String userId);
+	UserDto getUserByUserId(String userId);
 	
-	UserDato updateUser(String id, UserDato userDto);
+	UserDto updateUser(String id, UserDto userDto);
 	
 
 	void deleteUser(String userId);
 	
 	
-	List<UserDato> getUsers(int page, int limit);
+	List<UserDto> getUsers(int page, int limit);
 
 }

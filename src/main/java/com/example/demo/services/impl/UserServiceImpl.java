@@ -3,12 +3,12 @@ package com.example.demo.services.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,8 +19,9 @@ import com.example.demo.entites.UserEntity;
 import com.example.demo.repositories.UserRepository;
 import com.example.demo.services.UserService;
 import com.example.demo.shered.Utils;
+import com.example.demo.shered.dto.AddressDto;
 //import com.example.demo.shered.Utils;
-import com.example.demo.shered.dto.UserDato;
+import com.example.demo.shered.dto.UserDto;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,28 +38,84 @@ public class UserServiceImpl implements UserService {
 //	
 
 	@Override
-	public UserDato creatUser(UserDato user) {
-
-		UserEntity checkUser = userRepository.findByEmail(user.getEmail());
-
-		if (checkUser != null)
-			throw new RuntimeException("User Alrady Exists");
-		UserEntity userEntity = new UserEntity(); //// extensy objet de type userEntity
-
-		BeanUtils.copyProperties(user, userEntity); //// user source sible target userEntity
-
+public UserDto creatUser(UserDto user) {
+		
+UserEntity checkUser = userRepository.findByEmail(user.getEmail());
+		
+		if(checkUser != null) throw new RuntimeException("User Alrady Exists !");
+		
+		
+		for(int i=0; i < user.getAddresses().size(); i++) {
+			
+			AddressDto address = user.getAddresses().get(i);
+			address.setUser(user);
+			address.setAddressId(util.generateStringId(30));
+			user.getAddresses().set(i, address);
+		}
+		
+		
+		
+        ModelMapper modelMapper = new ModelMapper();
+		
+		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
+		
+		
 		userEntity.setEncryptedPassword(bCrypePasswordEncoder.encode(user.getPassword()));
-//		userEntity.setUserId("20");
-		userEntity.setUserId(util.generateUserId(32));
-
+		
+		userEntity.setUserId(util.generateStringId(32));
+		
 		UserEntity newUser = userRepository.save(userEntity);
-
-		UserDato userDto = new UserDato();
-		BeanUtils.copyProperties(newUser, userDto);
-
+		
+		UserDto userDto =  modelMapper.map(newUser, UserDto.class);
+		
 		return userDto;
-
 	}
+
+	
+	
+	
+//	@Override
+//	public UserDato creatUser(UserDato user) {
+//
+//		UserEntity checkUser = userRepository.findByEmail(user.getEmail());
+//
+//		if (checkUser != null)
+//			throw new RuntimeException("User Alrady Exists");
+////		UserEntity userEntity = new UserEntity(); //// extensy objet de type userEntity
+//
+////		BeanUtils.copyProperties(user, userEntity); //// user source sible target userEntity
+//
+//	
+//		
+//		for(int i=0; i< user.getAddresses().size(); i++) {
+//			
+//			AddressDto address = user.getAddresses().get(i);
+//			address.setUser(user);
+//			address.setAddressId(util.generateStringId(30));
+//			user.getAddresses().set(i, address);
+//		
+//		}
+//		ModelMapper modelMapper = new ModelMapper();
+//		
+//		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
+//		
+//		
+//		userEntity.setEncryptedPassword(bCrypePasswordEncoder.encode(user.getPassword()));
+////		userEntity.setUserId("20");
+//		userEntity.setUserId(util.generateStringId(32));
+//
+//		UserEntity newUser = userRepository.save(userEntity); ///persi
+//
+////		UserDato userDto = new UserDato();
+////		BeanUtils.copyProperties(newUser, userDto);
+//
+//		UserDato userDto =  modelMapper.map(newUser, UserDato.class);
+//		return userDto;
+//
+//	}
+	
+	
+	
 
 ////methode pour recupere les utulisateur autontifimn DB
 	@Override
@@ -72,23 +129,23 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDato getUser(String email) {
+	public UserDto getUser(String email) {
 		UserEntity userEntity = userRepository.findByEmail(email);
 		if (userEntity == null)
 			throw new UsernameNotFoundException(email);
 
-		UserDato userDto = new UserDato();
+		UserDto userDto = new UserDto();
 
 		BeanUtils.copyProperties(userEntity, userDto);
 		return userDto;
 	}
 
 	@Override
-	public UserDato getUserByUserId(String userId) {
+	public UserDto getUserByUserId(String userId) {
 		UserEntity userEntity = userRepository.findByUserId(userId);
 		if (userEntity == null)
 			throw new UsernameNotFoundException(userId);
-		UserDato userDto = new UserDato();
+		UserDto userDto = new UserDto();
 
 		BeanUtils.copyProperties(userEntity, userDto);
 
@@ -96,7 +153,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDato updateUser(String userId, UserDato userDto) {
+	public UserDto updateUser(String userId, UserDto userDto) {
 			System.out.println(userId);
 		UserEntity userEntity = userRepository.findByUserId(userId);
 		
@@ -106,7 +163,7 @@ public class UserServiceImpl implements UserService {
 		userEntity.setFirstName(userDto.getFirstName());
 		userEntity.setLastName(userDto.getLastName());
 		UserEntity userUpdate = userRepository.save(userEntity);
-		UserDato user = new UserDato();
+		UserDto user = new UserDto();
 		BeanUtils.copyProperties(userUpdate, user);
 
 		return user;
@@ -123,10 +180,10 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-   public List<UserDato> getUsers(int page, int limit) {
+   public List<UserDto> getUsers(int page, int limit) {
 		if(page > 0) page = page - 1;
 
-   List<UserDato> usersResponse = new ArrayList();
+   List<UserDto> usersResponse = new ArrayList();
    
 	Pageable pageableRequest = PageRequest.of(page, limit);
 	/*recupere tout in DB without pagination so we will add to user repository
@@ -136,7 +193,7 @@ public class UserServiceImpl implements UserService {
 	
 	for(UserEntity userEntity: users) {
 		
-		UserDato user =new UserDato();
+		UserDto user =new UserDto();
 		BeanUtils.copyProperties(userEntity, user);
 		usersResponse.add(user);
 	}

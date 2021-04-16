@@ -1,63 +1,41 @@
-package com.example.demo.entites;
+package com.example.demo.shered.dto;
 
 import java.io.Serializable;
-
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-
-@Entity(name="users")
-public class UserEntity implements Serializable {
-
+public class UserDto  implements Serializable{
+	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6949828312801015558L;
-
-	@Id  //prim key
-	@GeneratedValue /// auto incrmt
+	// when we create a now object from class DTO  it will be created with this id (3an tari9 had l id)
+	private static final long serialVersionUID = -4689030934525592466L;
+	
+	
 	private long id;
-	@Column(nullable=false, length=50) ////not null
 	private String userId;
-	
-	@Column(nullable=false, length=50) ////not null
 	private String firstName;
-	@Column(nullable=false, length=50) ////not null
 	private String lastName;
-	@Column(nullable=false, length=120, unique=true)
 	private String email;
-	@Column(nullable= false)
+	private String password;
 	private String encryptedPassword;
-	@Column(nullable=true)
 	private String emailVeificationToken;
-	///	@Column(columnDefinition="boolen defult false") ////discrption
-	@Column(nullable= false)
-	private Boolean emailVerificationStatus; 
+	private Boolean emailVerificationStatus;
 	
-	
-	////chaque objet user peut avoir plusr adresses 
-	@OneToMany(mappedBy="user", cascade=CascadeType.ALL)
-	private List<AddressEntity> addresses;	
-	
+	private List<AddressDto> addresses;
 	public long getId() {
 		return id;
 	}
 	public void setId(long id) {
 		this.id = id;
 	}
+	
 	public String getUserId() {
 		return userId;
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	
 	public String getFirstName() {
 		return firstName;
 	}
@@ -76,6 +54,12 @@ public class UserEntity implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
 	public String getEncryptedPassword() {
 		return encryptedPassword;
 	}
@@ -88,19 +72,22 @@ public class UserEntity implements Serializable {
 	public void setEmailVeificationToken(String emailVeificationToken) {
 		this.emailVeificationToken = emailVeificationToken;
 	}
-	public Boolean getEmailVerificationStatus() {
+	public Boolean isEmailVerificationStatus() {
 		return emailVerificationStatus;
 	}
 	public void setEmailVerificationStatus(Boolean emailVerificationStatus) {
 		this.emailVerificationStatus = emailVerificationStatus;
 	}
-	public List<AddressEntity> getAddresses() {
+
+	public List<AddressDto> getAddresses() {
 		return addresses;
 	}
-	public void setAddresses(List<AddressEntity> addresses) {
+	public void setAddresses(List<AddressDto> addresses) {
 		this.addresses = addresses;
 	}
+	
+	
+	
+	
 
-	
-	
 }

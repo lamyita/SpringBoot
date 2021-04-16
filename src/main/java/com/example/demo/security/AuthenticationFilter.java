@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.example.demo.SpringApplicationContext;
 import com.example.demo.requests.UserLoginRequest;
 import com.example.demo.services.UserService;
-import com.example.demo.shered.dto.UserDato;
+import com.example.demo.shered.dto.UserDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
@@ -78,7 +78,7 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
                 .compact();
         
         UserService userSrevice = (UserService)SpringApplicationContext.getBean("userServiceImpl");
-        UserDato userDto = userSrevice.getUser(userName);
+        UserDto userDto = userSrevice.getUser(userName);
        
        
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);

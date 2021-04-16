@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ import com.example.demo.requests.UserRequest;
 import com.example.demo.responses.ErrorMessage;
 import com.example.demo.responses.UserResponse;
 import com.example.demo.services.UserService;
-import com.example.demo.shered.dto.UserDato;
+import com.example.demo.shered.dto.UserDto;
 
 /*le contrôleur c'est lui qui joue le role de la reseption
  *  des dommandes
@@ -43,7 +44,7 @@ public class UserController {
 	
 	////produces produit les donnee la serialisation 
 	@GetMapping(path="/{id}", produces={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})	public ResponseEntity<UserResponse> getUser(@PathVariable  String id) {
-	UserDato userDto = userService.getUserByUserId(id);	
+	UserDto userDto = userService.getUserByUserId(id);	
 	UserResponse userResponse = new UserResponse();
 	BeanUtils.copyProperties(userDto, userResponse);
 	return new ResponseEntity<UserResponse>(userResponse,HttpStatus.OK)  ;
@@ -54,9 +55,9 @@ public class UserController {
 	@GetMapping(produces={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})	public List<UserResponse> getAllUsers(@RequestParam(value="page") int page, @RequestParam(value="limit")int limit){
 		List<UserResponse> usersResponse = new ArrayList<>();
 		///recupere from BD
-		List<UserDato> users = userService.getUsers(page,limit);
+		List<UserDto> users = userService.getUsers(page,limit);
 		///perse from usersDto 
-		for(UserDato userDto: users) {
+		for(UserDto userDto: users) {
 			UserResponse user = new UserResponse();
 			BeanUtils.copyProperties(userDto, user);
 			
@@ -75,21 +76,21 @@ public class UserController {
 			 produces={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE}
 		   )
 	///@valid hna spring ghadi y virify userRquest wash 
-	public  ResponseEntity<UserResponse> creatUser( @RequestBody @Valid  UserRequest userRequest) throws Exception {    
+	public  ResponseEntity<UserResponse> creatUser( @RequestBody @Valid UserRequest userRequest) throws Exception {    
 			
 		if(userRequest.getFirstName().isEmpty()) throw new UserException(ErrorMessage.MISSING_REQUIRED_FIELD.getErrorMessage());
 		
-		UserDato userDto = new UserDato();
-			///affecte from userRequest ti userDtao
-			BeanUtils.copyProperties(userRequest, userDto);
-			////send formation vr service
-			UserDato creatUser = userService.creatUser(userDto);
-			////create response
-			UserResponse userResponse = new UserResponse();
-			
-			BeanUtils.copyProperties(creatUser, userResponse);
-			
-			return new ResponseEntity<UserResponse>(userResponse,HttpStatus.CREATED);
+		//UserDto userDto = new UserDto();
+				//BeanUtils.copyProperties(userRequest, userDto);
+				ModelMapper modelMapper = new ModelMapper();
+				UserDto userDto = modelMapper.map(userRequest, UserDto.class);
+				userDto.setEmailVerificationStatus(false);
+				UserDto createUser = userService.creatUser(userDto);
+				
+				UserResponse userResponse =  modelMapper.map(createUser, UserResponse.class);
+				
+				return new ResponseEntity<UserResponse>(userResponse, HttpStatus.CREATED);
+				
 }
 
 	@PutMapping(
@@ -99,11 +100,11 @@ public class UserController {
 		   )
 	public ResponseEntity <UserResponse> updateUser(@PathVariable String id, @RequestBody UserRequest userRequest ) {
 		
-		UserDato userDto = new UserDato();
+		UserDto userDto = new UserDto();
 		
 		BeanUtils.copyProperties(userRequest, userDto);
 		
-		UserDato updateUser = userService.updateUser(id, userDto);
+		UserDto updateUser = userService.updateUser(id, userDto);
 		
 		UserResponse userResponse = new UserResponse();
 		
