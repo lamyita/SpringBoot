@@ -45,6 +45,8 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 		if(checkUser != null) throw new RuntimeException("User Alrady Exists !");
 		
 		
+		
+		////persist les addres
 		for(int i=0; i < user.getAddresses().size(); i++) {
 			
 			AddressDto address = user.getAddresses().get(i);
@@ -53,9 +55,12 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 			user.getAddresses().set(i, address);
 		}
 		
+		//recupere contactID
+		user.getContact().setContactId(util.generateStringId(30));
 		
+		user.getContact().setUser(user);
 		
-        ModelMapper modelMapper = new ModelMapper();
+		ModelMapper modelMapper = new ModelMapper();
 		
 		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 		
@@ -178,28 +183,74 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 		userRepository.delete(userEntity);
 		
 	}
-
 	@Override
-   public List<UserDto> getUsers(int page, int limit) {
-		if(page > 0) page = page - 1;
-
-   List<UserDto> usersResponse = new ArrayList();
-   
-	Pageable pageableRequest = PageRequest.of(page, limit);
-	/*recupere tout in DB without pagination so we will add to user repository
-    *  another hirit place CrudRepository add PagingAndSortingRepository */ 
-	Page<UserEntity> userPage =  userRepository.findAll(pageableRequest);
-	List<UserEntity> users = userPage.getContent();
-	
-	for(UserEntity userEntity: users) {
+	public List<UserDto> getUsers(int page, int limit, String search, int status) {
 		
-		UserDto user =new UserDto();
-		BeanUtils.copyProperties(userEntity, user);
-		usersResponse.add(user);
+		if(page > 0) page = page - 1;
+		
+		List<UserDto> usersDto = new ArrayList<>();
+		
+		Pageable pageableRequest = PageRequest.of(page, limit);
+		
+		Page<UserEntity> userPage;
+		
+		if(search.isEmpty()) {
+			userPage = userRepository.findAllUsers(pageableRequest);
+		}
+		else {
+			
+			userPage = userRepository.findAllUserByCriteria(pageableRequest, search, status);
+		}
+		
+		
+		List<UserEntity> users = userPage.getContent();
+		
+		for(UserEntity userEntity: users) {
+			
+			ModelMapper modelMapper = new ModelMapper();	
+			UserDto user = modelMapper.map(userEntity, UserDto.class);
+			
+			usersDto.add(user);
+		}
+		
+		return usersDto;
 	}
-	
-	return usersResponse;
-	}
+
+//	@Override
+//	public List<UserDto> getUsers(int page, int limit, String search) {	
+//		
+//		if(page > 0) page = page - 1;
+//
+//   List<UserDto> usersResponse = new ArrayList();
+//   
+//	Pageable pageableRequest = PageRequest.of(page, limit);
+//	/*recupere tout in DB without pagination so we will add to user repository
+//    *  another hirit place CrudRepository add PagingAndSortingRepository */ 
+//	Page<UserEntity> userPage;
+//	
+//	
+//	if(search.isEmpty()) {
+//		userPage = userRepository.findAllUser(pageableRequest);
+//	}else {
+//		
+//		
+//		userPage = userRepository.findAllUserByCriteria(pageableRequest, search);
+//	}
+//	
+//	
+//	List<UserEntity> users = userPage.getContent();
+//
+//	
+//	for(UserEntity userEntity: users) {
+//		ModelMapper modelMapper = new ModelMapper();
+//		UserDto user = modelMapper.map(userEntity, UserDto.class);
+////		UserDto user =new UserDto();
+////		BeanUtils.copyProperties(userEntity, user);
+//		usersResponse.add(user);
+//	}
+//	
+//	return usersResponse;
+//	}
 
 }
  

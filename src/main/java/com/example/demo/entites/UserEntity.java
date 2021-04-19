@@ -1,15 +1,19 @@
 package com.example.demo.entites;
 
 import java.io.Serializable;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 
 @Entity(name="users")
@@ -42,8 +46,14 @@ public class UserEntity implements Serializable {
 	
 	
 	////chaque objet user peut avoir plusr adresses 
-	@OneToMany(mappedBy="user", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="user", fetch = FetchType.EAGER, cascade=CascadeType.ALL)
 	private List<AddressEntity> addresses;	
+	
+	@OneToOne(mappedBy="user",fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+	private ContactEntity contact;
+	
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy="users")
+	private Set<GroupEntity> groups = new HashSet<>();
 	
 	public long getId() {
 		return id;
@@ -76,6 +86,10 @@ public class UserEntity implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	@Column(nullable=true)
+	private Boolean admin = false;
+	
+	
 	public String getEncryptedPassword() {
 		return encryptedPassword;
 	}
@@ -99,6 +113,18 @@ public class UserEntity implements Serializable {
 	}
 	public void setAddresses(List<AddressEntity> addresses) {
 		this.addresses = addresses;
+	}
+	public ContactEntity getContact() {
+		return contact;
+	}
+	public void setContact(ContactEntity contact) {
+		this.contact = contact;
+	}
+	public Boolean getAdmin() {
+		return admin;
+	}
+	public void setAdmin(Boolean admin) {
+		this.admin = admin;
 	}
 
 	

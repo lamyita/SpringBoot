@@ -29,8 +29,19 @@ public class UserRequest {
 	private String password;
 	
 	
+	public Boolean getAdmin() {
+		return admin;
+	}
+	public void setAdmin(Boolean admin) {
+		this.admin = admin;
+	}
 	private List<AddressRequest> addresses;
 	
+	private ContactRequest contact;
+	private Boolean admin = false;
+
+	
+
 	public String getFirstName() {
 		return firstName;
 	}
@@ -62,6 +73,12 @@ public class UserRequest {
 		this.addresses = addresses;
 	}
 	
+	public ContactRequest getContact() {
+		return contact;
+	}
+	public void setContact(ContactRequest contact) {
+		this.contact = contact;
+	}
 
 	
 	

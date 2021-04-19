@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,8 @@ import com.example.demo.shered.dto.UserDto;
  *  des dommandes
  *   est emetre des reponse*/
 //// le controller c'est la couche reseption 
+
+@CrossOrigin(origins="*") ////autoris nom de dom
 @RestController
 @RequestMapping("/users") //localhost:8086/users
 public class UserController {
@@ -50,25 +53,25 @@ public class UserController {
 	return new ResponseEntity<UserResponse>(userResponse,HttpStatus.OK)  ;
 	
 	}
+//	@CrossOrigin(origins={"http://localhost:4200"})
 	
 	////@RequestParam notation take value of page and affect to int page also about limit
-	@GetMapping(produces={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})	public List<UserResponse> getAllUsers(@RequestParam(value="page") int page, @RequestParam(value="limit")int limit){
+	@GetMapping(produces={MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})	
+	public ResponseEntity<List<UserResponse>> getAllUsers(@RequestParam(value="page", defaultValue = "1") int page,@RequestParam(value="limit", defaultValue = "4")  int limit ,@RequestParam(value="search", defaultValue = "") String search,@RequestParam(value="status", defaultValue = "1") int status) {	
 		List<UserResponse> usersResponse = new ArrayList<>();
 		///recupere from BD
-		List<UserDto> users = userService.getUsers(page,limit);
-		///perse from usersDto 
-		for(UserDto userDto: users) {
-			UserResponse user = new UserResponse();
-			BeanUtils.copyProperties(userDto, user);
-			
-			usersResponse.add(user);
-			
-		}
+	List<UserDto> users = userService.getUsers(page, limit, search, status);		///perse from usersDto 
+	for(UserDto userDto: users) {
+		ModelMapper modelMapper = new ModelMapper();
+		UserResponse userResponse =  modelMapper.map(userDto, UserResponse.class);
 		
+		usersResponse.add(userResponse);
 		
-		
-		return usersResponse;
 	}
+	
+		
+		
+	return new ResponseEntity<List<UserResponse>>(usersResponse, HttpStatus.OK);	}
 ///// in post mapping produit resevior et send 
 
 	@PostMapping(

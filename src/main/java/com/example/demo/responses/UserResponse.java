@@ -1,12 +1,27 @@
 package com.example.demo.responses;
 
+import java.util.List;
+
 public class UserResponse {
 
 	private String userId;
 	private String firstName;
 	private String lastName;
 	private String email;
+	private List<AddressResponse> addresses;
 	
+	
+	private ContactResponse contact;
+	
+	private Boolean admin = false;
+
+	
+	public Boolean getAdmin() {
+		return admin;
+	}
+	public void setAdmin(Boolean admin) {
+		this.admin = admin;
+	}
 	public String getUserId() {
 		return userId;
 	}
@@ -31,7 +46,19 @@ public class UserResponse {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+	public List<AddressResponse> getAddresses() {
+		return addresses;
+	}
+	public void setAddresses(List<AddressResponse> addresses) {
+		this.addresses = addresses;
+	}
+	public ContactResponse getContact() {
+		return contact;
+	}
+	public void setContact(ContactResponse contact) {
+		this.contact = contact;
+	}
+
 	
 	
 }
