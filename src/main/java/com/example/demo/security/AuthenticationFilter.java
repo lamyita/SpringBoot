@@ -69,22 +69,26 @@ public class AuthenticationFilter  extends UsernamePasswordAuthenticationFilter{
 //        
 //        UserDato userDto = userService.getUser(userName);
 //        
+      UserService userSrevice = (UserService)SpringApplicationContext.getBean("userServiceImpl");
+      UserDto userDto = userSrevice.getUser(userName);
+     
+     
         String token = Jwts.builder()
                 .setSubject(userName)
+                .claim("id", userDto.getUserId())
+                .claim("name", userDto.getFirstName() + " " + userDto.getLastName())
 //                .claim("id", userDto.getUserId())
 //                .claim("name", userDto.getFirstName() + " " + userDto.getLastName())
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET )
                 .compact();
         
-        UserService userSrevice = (UserService)SpringApplicationContext.getBean("userServiceImpl");
-        UserDto userDto = userSrevice.getUser(userName);
-       
-       
+      
         res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
         	res.addHeader("user_id", userDto.getUserId());
         
-//        res.getWriter().write("{\"token\": \"" + token + "\", \"id\": \""+ userDto.getUserId() + "\"}");
+        	////recu token in body
+        	res.getWriter().write("{\"token\": \"" + token + "\", \"id\": \""+ userDto.getUserId() + "\"}");
 
     }  
 	

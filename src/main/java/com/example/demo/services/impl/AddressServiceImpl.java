@@ -16,6 +16,7 @@ import com.example.demo.repositories.UserRepository;
 import com.example.demo.services.AddressService;
 import com.example.demo.shered.Utils;
 import com.example.demo.shered.dto.AddressDto;
+import com.example.demo.shered.dto.UserDto;
 
 
 @Service
@@ -42,7 +43,53 @@ public class AddressServiceImpl implements AddressService {
 		
 		return addressesDto;
 	}
+	
 
+	@Override
+	public AddressDto createAddress(AddressDto address, String email) {
+		UserEntity currentUser = userRepository.findByEmail(email);
+		
+		ModelMapper modelMapper = new ModelMapper();
+		UserDto userDto = modelMapper.map(currentUser, UserDto.class);
+		
+		address.setAddressId(util.generateStringId(30));
+		address.setUser(userDto);
+		
+		AddressEntity addressEntity = modelMapper.map(address, AddressEntity.class); 
+		
+		AddressEntity newAddress = addressRepository.save(addressEntity);
+		
+		AddressDto addressDto = modelMapper.map(newAddress, AddressDto.class);
+		
+		return addressDto;
+	}
+
+
+	@Override
+	public AddressDto getAddress(String addressId) {
+		
+		AddressEntity addressEntity = addressRepository.findByAddressId(addressId);
+		
+		ModelMapper modelMapper = new ModelMapper();
+		
+		AddressDto addressDto = modelMapper.map(addressEntity, AddressDto.class);
+		
+		return addressDto;
+	}
+
+	@Override
+	public void deleteAddress(String addressId) {
+		
+		AddressEntity address = addressRepository.findByAddressId(addressId);
+		
+		if(address == null) throw new RuntimeException("Address not found");
+		
+		addressRepository.delete(address);
+	
+	}
+	
+
+	
 	
 
 }

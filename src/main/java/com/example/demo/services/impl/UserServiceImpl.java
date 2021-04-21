@@ -38,91 +38,45 @@ public class UserServiceImpl implements UserService {
 //	
 
 	@Override
-public UserDto creatUser(UserDto user) {
-		
-UserEntity checkUser = userRepository.findByEmail(user.getEmail());
-		
-		if(checkUser != null) throw new RuntimeException("User Alrady Exists !");
-		
-		
-		
-		////persist les addres
-		for(int i=0; i < user.getAddresses().size(); i++) {
-			
+	public UserDto creatUser(UserDto user) {
+
+		UserEntity checkUser = userRepository.findByEmail(user.getEmail());
+
+		if (checkUser != null)
+			throw new RuntimeException("User Alrady Exists !");
+
+		//// persist les addres
+		for (int i = 0; i < user.getAddresses().size(); i++) {
+
 			AddressDto address = user.getAddresses().get(i);
 			address.setUser(user);
 			address.setAddressId(util.generateStringId(30));
 			user.getAddresses().set(i, address);
 		}
-		
-		//recupere contactID
+
+		// recupere contactID
 		user.getContact().setContactId(util.generateStringId(30));
-		
+
 		user.getContact().setUser(user);
-		
+
 		ModelMapper modelMapper = new ModelMapper();
-		
+
 		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-		
-		
+
 		userEntity.setEncryptedPassword(bCrypePasswordEncoder.encode(user.getPassword()));
-		
+
 		userEntity.setUserId(util.generateStringId(32));
-		
+
 		UserEntity newUser = userRepository.save(userEntity);
-		
-		UserDto userDto =  modelMapper.map(newUser, UserDto.class);
-		
+
+		UserDto userDto = modelMapper.map(newUser, UserDto.class);
+
 		return userDto;
 	}
 
-	
-	
-	
-//	@Override
-//	public UserDato creatUser(UserDato user) {
-//
-//		UserEntity checkUser = userRepository.findByEmail(user.getEmail());
-//
-//		if (checkUser != null)
-//			throw new RuntimeException("User Alrady Exists");
-////		UserEntity userEntity = new UserEntity(); //// extensy objet de type userEntity
-//
-////		BeanUtils.copyProperties(user, userEntity); //// user source sible target userEntity
-//
-//	
-//		
-//		for(int i=0; i< user.getAddresses().size(); i++) {
-//			
-//			AddressDto address = user.getAddresses().get(i);
-//			address.setUser(user);
-//			address.setAddressId(util.generateStringId(30));
-//			user.getAddresses().set(i, address);
-//		
-//		}
-//		ModelMapper modelMapper = new ModelMapper();
-//		
-//		UserEntity userEntity = modelMapper.map(user, UserEntity.class);
-//		
-//		
-//		userEntity.setEncryptedPassword(bCrypePasswordEncoder.encode(user.getPassword()));
-////		userEntity.setUserId("20");
-//		userEntity.setUserId(util.generateStringId(32));
-//
-//		UserEntity newUser = userRepository.save(userEntity); ///persi
-//
-////		UserDato userDto = new UserDato();
-////		BeanUtils.copyProperties(newUser, userDto);
-//
-//		UserDato userDto =  modelMapper.map(newUser, UserDato.class);
-//		return userDto;
-//
-//	}
-	
-	
-	
 
-////methode pour recupere les utulisateur autontifimn DB
+
+////methode pour recupere les utulisateur authentifié mn DB
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
@@ -159,9 +113,9 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 
 	@Override
 	public UserDto updateUser(String userId, UserDto userDto) {
-			System.out.println(userId);
+		System.out.println(userId);
 		UserEntity userEntity = userRepository.findByUserId(userId);
-		
+
 //		System.out.println(userEntity.ge());
 		if (userEntity == null)
 			throw new UsernameNotFoundException(userId);
@@ -178,41 +132,41 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 	public void deleteUser(String userId) {
 		UserEntity userEntity = userRepository.findByUserId(userId);
 		if (userEntity == null)
-			throw new UsernameNotFoundException(userId);	
-		
+			throw new UsernameNotFoundException(userId);
+
 		userRepository.delete(userEntity);
-		
+
 	}
+
 	@Override
 	public List<UserDto> getUsers(int page, int limit, String search, int status) {
-		
-		if(page > 0) page = page - 1;
-		
+
+		if (page > 0)
+			page = page - 1;
+
 		List<UserDto> usersDto = new ArrayList<>();
-		
+
 		Pageable pageableRequest = PageRequest.of(page, limit);
-		
+
 		Page<UserEntity> userPage;
-		
-		if(search.isEmpty()) {
+
+		if (search.isEmpty()) {
 			userPage = userRepository.findAllUsers(pageableRequest);
-		}
-		else {
-			
+		} else {
+
 			userPage = userRepository.findAllUserByCriteria(pageableRequest, search, status);
 		}
-		
-		
+
 		List<UserEntity> users = userPage.getContent();
-		
-		for(UserEntity userEntity: users) {
-			
-			ModelMapper modelMapper = new ModelMapper();	
+
+		for (UserEntity userEntity : users) {
+
+			ModelMapper modelMapper = new ModelMapper();
 			UserDto user = modelMapper.map(userEntity, UserDto.class);
-			
+
 			usersDto.add(user);
 		}
-		
+
 		return usersDto;
 	}
 
@@ -253,4 +207,3 @@ UserEntity checkUser = userRepository.findByEmail(user.getEmail());
 //	}
 
 }
- 
